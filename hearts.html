@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Particles Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            background: #000;
+        }
+
+        #info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        #info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="info">
+        <p>Hearts: <span id="heartCount">0</span></p>
+        <p>Click to create hearts</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const ww = canvas.width = window.innerWidth;
+        const wh = canvas.height = window.innerHeight;
+
+        let hearts = [];
+
+        // Heart particle constructor
+        function Heart(x, y) {
+            this.x = x || Math.random() * ww;
+            this.y = y || Math.random() * wh;
+            this.opacity = Math.random() * 0.5 + 0.5;
+            this.vel = {
+                x: (Math.random() - 0.5) * 4,
+                y: (Math.random() - 0.5) * 4,
+            };
+            this.targetScale = Math.random() * 0.15 + 0.02;
+            this.scale = this.targetScale * Math.random();
+            this.life = 1;
+            this.decay = Math.random() * 0.015 + 0.015;
+        }
+
+        // Heart drawing function
+        Heart.prototype.draw = function() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity * this.life;
+            ctx.fillStyle = '#ff69b4';
+            ctx.translate(this.x, this.y);
+            ctx.scale(this.scale, this.scale);
+            ctx.beginPath();
+            
+            // Draw heart shape using bezier curves
+            ctx.moveTo(75, 40);
+            ctx.bezierCurveTo(75, 37, 70, 25, 50, 25);
+            ctx.bezierCurveTo(37, 25, 25, 37, 25, 50);
+            ctx.bezierCurveTo(25, 68, 75, 100, 75, 100);
+            ctx.bezierCurveTo(75, 100, 125, 68, 125, 50);
+            ctx.bezierCurveTo(125, 37, 113, 25, 100, 25);
+            ctx.bezierCurveTo(80, 25, 75, 37, 75, 40);
+            
+            ctx.fill();
+            ctx.restore();
+        };
+
+        // Heart update function
+        Heart.prototype.update = function() {
+            this.x += this.vel.x;
+            this.y += this.vel.y;
+            this.vel.y += 0.1; // Gravity
+            this.life -= this.decay;
+            this.scale += this.targetScale * 0.02;
+            this.opacity *= 0.98;
+        };
+
+        // Animation loop
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, ww, wh);
+
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                const heart = hearts[i];
+                heart.update();
+                heart.draw();
+
+                if (heart.life <= 0) {
+                    hearts.splice(i, 1);
+                }
+            }
+
+            document.getElementById('heartCount').textContent = hearts.length;
+            requestAnimationFrame(animate);
+        }
+
+        // Create hearts on click
+        document.addEventListener('click', (e) => {
+            for (let i = 0; i < 5; i++) {
+                hearts.push(new Heart(e.clientX, e.clientY));
+            }
+        });
+
+        // Auto-create hearts
+        setInterval(() => {
+            const randomX = Math.random() * ww;
+            const randomY = Math.random() * wh;
+            hearts.push(new Heart(randomX, randomY));
+        }, 300);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = ww;
+            canvas.height = wh;
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
