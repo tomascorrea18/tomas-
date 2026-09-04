@@ -103,53 +103,42 @@
             this.opacity *= 0.98;
         };
 
-        // Create text heart shape - distributes text along heart curve
+        // Create text heart shape - distributes text horizontally
         function createTextHeart() {
-            const text = "t e   a m o";
-            const heartScale = 3;
+            const words = ["te", "amo"];
             const centerX = ww / 2;
             const centerY = wh / 2;
+            const spacing = 120; // Espacio entre palabras
             
-            // Generate points along heart curve
-            const points = [];
-            for (let t = 0; t < Math.PI * 2; t += 0.035) {
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
-                points.push({
-                    x: centerX + x * heartScale,
-                    y: centerY - y * heartScale
-                });
-            }
+            let xPos = centerX - (spacing / 2);
             
-            // Place text characters along heart curve
-            for (let i = 0; i < points.length; i++) {
-                const point = points[i];
-                const charIndex = i % text.length;
-                textHearts.push({
-                    x: point.x,
-                    y: point.y,
-                    char: text[charIndex],
-                    angle: (i / points.length) * Math.PI * 2
-                });
+            for (let word of words) {
+                const charSpacing = 50; // Espacio entre letras
+                let charXPos = xPos - ((word.length - 1) * charSpacing) / 2;
+                
+                for (let i = 0; i < word.length; i++) {
+                    textHearts.push({
+                        x: charXPos + i * charSpacing,
+                        y: centerY,
+                        char: word[i],
+                        angle: 0
+                    });
+                }
+                xPos += spacing;
             }
         }
 
         // Draw text heart
         function drawTextHeart() {
             ctx.save();
-            ctx.font = "bold 20px Arial";
+            ctx.font = "bold 80px Arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillStyle = "#ff1493";
             
-            textHearts.forEach((textHeart, index) => {
-                ctx.fillStyle = "#ff1493"; // Color rosado fijo
-                
-                ctx.save();
-                ctx.translate(textHeart.x, textHeart.y);
-                ctx.rotate(textHeart.angle);
-                ctx.fillText(textHeart.char, 0, 0);
-                ctx.restore();
+            textHearts.forEach((textHeart) => {
+                ctx.fillStyle = "#ff1493";
+                ctx.fillText(textHeart.char, textHeart.x, textHeart.y);
             });
             
             ctx.restore();
