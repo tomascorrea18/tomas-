@@ -105,7 +105,7 @@
 
         // Create text heart shape - distributes text along heart curve
         function createTextHeart() {
-            const text = "I Love You";
+            const text = "te amo";
             const heartScale = 3;
             const centerX = ww / 2;
             const centerY = wh / 2;
@@ -143,8 +143,7 @@
             ctx.fillStyle = "#ff1493";
             
             textHearts.forEach((textHeart, index) => {
-                const hue = (Date.now() / 10 + index * 2) % 360;
-                ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                ctx.fillStyle = "#ff1493"; // Color rosado fijo
                 
                 ctx.save();
                 ctx.translate(textHeart.x, textHeart.y);
