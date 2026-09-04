@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>"I Love You"</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: black;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+      
+        const PINK = "#FF69B4";
+        const LIGHT_PINK = "#FFB6C1";
+        const WHITE = "#FFFFFF";
+
+        function getHeartPoint(t, scale = 16) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            return {
+                x: width / 2 + x * scale,
+                y: height / 2 + y * scale
+            };
+        }
+
+        
+        let particles = [];
+        const TOTAL_PARTICLES = 160;
+
+        class TextParticle {
+            constructor() {
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                this.x = Math.random() * width;
+                this.y = initial ? Math.random() * height : height + 20;
+                this.speed = Math.random() * 1.8 + 0.6;
+                this.fontSize = Math.floor(Math.random() * 8) + 12;
+                this.opacity = Math.random() * 0.7 + 0.3;
+                
+                const colors = [PINK, LIGHT_PINK, WHITE, "#999999"];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                this.y -= this.speed;
+                if (this.y < -20) {
+                    this.reset(false);
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.font = `bold ${this.fontSize}px Arial`;
+                ctx.fillText("I LOVE YOU", this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        function generateParticles() {
+            particles = [];
+            for (let i = 0; i < TOTAL_PARTICLES; i++) {
+                particles.push(new TextParticle());
+            }
+        }
+
+        let borderHearts = [];
+        const TOTAL_BORDER_HEARTS = 320;
+
+        function generateBorderHearts() {
+            borderHearts = [];
+            for (let i = 0; i < TOTAL_BORDER_HEARTS; i++) {
+                const t = (i / TOTAL_BORDER_HEARTS) * Math.PI * 2;
+                const point = getHeartPoint(t);
+                
+          
+                const devX = (Math.random() - 0.5) * 16;
+                const devY = (Math.random() - 0.5) * 16;
+
+                borderHearts.push({
+                    x: point.x + devX,
+                    y: point.y + devY,
+                    rotation: Math.random() * Math.PI * 2,
+                    scale: Math.random() * 0.5 + 0.9,
+                    color: (i % 2 === 0) ? PINK : LIGHT_PINK,
+                    opacity: Math.random() * 0.5 + 0.4
+                });
+            }
+        }
+
+    
+        window.addEventListener("resize", () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            generateParticles();
+            generateBorderHearts();
+        });
+
+      
+        generateParticles();
+        generateBorderHearts();
+
+      
+        function drawMiniHeartShape(scale, color, opacity) {
+            ctx.beginPath();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = color;
+            ctx.moveTo(0, 0);
+            
+            ctx.bezierCurveTo(10 * scale, -10 * scale, 20 * scale, 10 * scale, 0, 25 * scale);
+            ctx.bezierCurveTo(-20 * scale, 10 * scale, -10 * scale, -10 * scale, 0, 0);
+            
+            ctx.closePath();
+            ctx.fill();
+        }
+
+   
+        function drawTexturalHeart() {
+            ctx.save();
+
+           
+            ctx.beginPath();
+            for (let t = 0; t < Math.PI * 2; t += 0.01) {
+                const point = getHeartPoint(t);
+                if (t === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = "rgba(10, 0, 0, 0.4)";
+            ctx.fill();
+
+      
+            borderHearts.forEach(h => {
+                ctx.save();
+                ctx.translate(h.x, h.y);
+                ctx.rotate(h.rotation);
+                drawMiniHeartShape(h.scale, h.color, h.opacity);
+                ctx.restore();
+            });
+
+        
+            const centralTextOpacity = 0.85;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            ctx.fillStyle = LIGHT_PINK;
+            ctx.globalAlpha = centralTextOpacity;
+            ctx.font = "bold 28px Arial";
+            ctx.fillText("I LOVE YOU", width / 2, height / 2);
+
+            const subTexts = [
+                { text: "I LOVE YOU", size: 16, offset: { x: -60, y: -45 }, opacity: 0.6 },
+                { text: "I LOVE YOU", size: 14, offset: { x: 50, y: -50 }, opacity: 0.4 },
+                { text: "I LOVE YOU", size: 16, offset: { x: 60, y: 35 }, opacity: 0.6 },
+                { text: "I LOVE YOU", size: 12, offset: { x: -40, y: 30 }, opacity: 0.4 },
+                { text: "I LOVE YOU", size: 14, offset: { x: 10, y: 55 }, opacity: 0.5 },
+                { text: "I LOVE YOU", size: 12, offset: { x: 10, y: -65 }, opacity: 0.3 }
+            ];
+
+            subTexts.forEach(st => {
+                ctx.save();
+                ctx.fillStyle = WHITE;
+                ctx.globalAlpha = st.opacity * centralTextOpacity;
+                ctx.font = `bold ${st.size}px Arial`;
+                ctx.fillText(st.text, width / 2 + st.offset.x, height / 2 + st.offset.y);
+                ctx.restore();
+            });
+
+            ctx.restore();
+        }
+
+       
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+          
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+           
+            drawTexturalHeart();
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
